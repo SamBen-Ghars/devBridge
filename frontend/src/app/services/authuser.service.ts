@@ -123,10 +123,9 @@ export class AuthuserService {
     const decodedToken = this.jwtHelper.decodeToken(token);
     return !!decodedToken?.role && !this.jwtHelper.isTokenExpired(token);
   }
-  getCurrentUserId(): string | null {
-    const token = localStorage.getItem('token');
-    if (!token) return null;
-    return this.jwtHelper.decodeToken(token)?.id || null;
+  getCurrentUserId(): string {
+    const user = this.getCurrentUser();
+    return user ? user._id : '';
   }
   // Déconnexion plus robuste
   // Modifiez la méthode logout

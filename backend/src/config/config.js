@@ -11,7 +11,7 @@ module.exports = {
   BACKEND_URL: process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 3000}`,
   
   // Base de données
-  MONGO_URI: process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/project_management',
+  MONGO_URI: process.env.MONGO_URI || 'w',
   
   // Sécurité
   JWT_SECRET: process.env.JWT_SECRET || 'devbridge',

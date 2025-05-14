@@ -63,6 +63,27 @@
             </a>
             <!--  project desktop-->
             <!-- sameh -->
+
+            <a
+            routerLink="/front/projects"
+            (click)="toggleSidebar()"
+            class="group flex items-center px-2 py-2 text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors"
+          >
+            <svg
+              class="mr-4 h-6 w-6 text-gray-500 group-hover:text-purple-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+            projets
+          </a>
             <!--  ressources desktop-->
             <!-- sameh -->
             <!--  equipe desktop -->
@@ -313,6 +334,29 @@
           </svg>
           Réunions
         </a>
+        <a
+        routerLink="/front/projects"
+        (click)="toggleSidebar()"
+        class="group flex items-center px-2 py-2 text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors"
+      >
+        <svg
+          class="mr-4 h-6 w-6 text-gray-500 group-hover:text-purple-600"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+          />
+        </svg>
+        projets
+      </a>
+
+
+          
 
           <!-- Bouton Réunions -->
 
@@ -346,6 +390,9 @@
             </svg>
             Messages
           </a>
+         
+
+
           <!-- Bouton Notifications -->
           <a
             routerLink="/notifications"

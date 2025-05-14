@@ -46,7 +46,9 @@ const UserSchema = new mongoose.Schema({
   lastActive: {
     type: Date
   }
-}, {
+},
+
+{
   timestamps: true,
   toJSON: {
     transform: function(doc, ret) {
@@ -56,5 +58,4 @@ const UserSchema = new mongoose.Schema({
     }
   }
 });
-
 module.exports = mongoose.model('User', UserSchema);

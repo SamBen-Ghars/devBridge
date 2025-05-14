@@ -4,6 +4,7 @@ const { createServer } = require("http");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const path = require('path');
 
 const { ApolloServer } = require("@apollo/server");
 const { expressMiddleware } = require("@apollo/server/express4");
@@ -17,6 +18,9 @@ const {
 
 // Configurations
 const { verifyTokenGraphql } = require("./src/middlewares/authUserMiddleware");
+const projetRoute = require('./src/routes/projetRoute')
+const evaluationRoute = require("./src/routes/evaluationRoute");
+const renduRoutes = require("./src/routes/renduRoute");
 const userRoutes = require("./src/routes/userRoutes");
 const reunionRoutes = require("./src/routes/reunionRoutes");
 const planningRoutes = require("./src/routes/plannigRoutes");
@@ -60,10 +64,23 @@ app.use(
   })
 );
 
+// Configuration pour servir les fichiers statiques du dossier uploads
+app.use('/uploads', express.static(path.join(__dirname, 'src/uploads/uploads')));
+
+// Ajouter un log pour déboguer
+app.use('/uploads', (req, res, next) => {
+  console.log('Requested file:', req.url);
+  console.log('Looking in:', path.join(__dirname, 'src/uploads/uploads', req.url));
+  next();
+});
+
 // 3. REST Routes
-app.use("/api/plannings",planningRoutes);
-app.use("/api/reunions",reunionRoutes);
-app.use("/api/users",userRoutes);
+app.use("/api/plannings", planningRoutes);
+app.use("/api/projets", projetRoute);
+app.use("/api/reunions", reunionRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/rendus", renduRoutes);
+app.use("/api/evaluations", evaluationRoute);
 // 4. Health Check Endpoint
 app.get("/health", (req, res) => {
   res.status(200).json({

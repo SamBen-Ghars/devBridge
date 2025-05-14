@@ -5,30 +5,41 @@ import {
   HttpParams,
 } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, catchError, of, tap, throwError } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  catchError,
+  of,
+  tap,
+  throwError,
+} from 'rxjs';
 import { User } from '../models/user.model';
 import { environment } from 'src/environments/environment';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { AuthuserService } from './authuser.service';
-
+ 
 @Injectable({
   providedIn: 'root',
 })
 export class DataService {
   private usersCache$ = new BehaviorSubject<User[]>([]);
   private lastFetchTime: number = 0;
-  private readonly CACHE_DURATION = 300000; 
+  private readonly CACHE_DURATION = 300000;
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private userAddedSubject = new BehaviorSubject<void | null>(null);
   public userAdded$ = this.userAddedSubject.asObservable();
-  constructor(private http: HttpClient, private jwtHelper: JwtHelperService, private authService: AuthuserService) {
+  constructor(
+    private http: HttpClient,
+    private jwtHelper: JwtHelperService,
+    private authService: AuthuserService
+  ) {
     this.initializeCurrentUser();
   }
-   fetchCurrentUser(): Observable<User> {
-  return this.getProfile().pipe(
-    tap(user => this.currentUserSubject.next(user))
-  );
-}
+  fetchCurrentUser(): Observable<User> {
+    return this.getProfile().pipe(
+      tap((user) => this.currentUserSubject.next(user))
+    );
+  }
   private getAdminHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
     if (!token || this.jwtHelper.isTokenExpired(token)) {
@@ -57,11 +68,11 @@ export class DataService {
   }
   syncCurrentUser(): Observable<User> {
     return this.getProfile().pipe(
-      tap(user => {
+      tap((user) => {
         this.currentUserSubject.next(user);
         this.authService.setCurrentUser(user);
       }),
-      catchError(error => {
+      catchError((error) => {
         // If fetch fails, try to get from auth service
         const authUser = this.authService.getCurrentUser();
         if (authUser) {
@@ -78,9 +89,7 @@ export class DataService {
         headers: this.getUserHeaders(),
         params: this.getCommonParams(),
       })
-      .pipe(
-        catchError(this.handleError)
-      );
+      .pipe(catchError(this.handleError));
   }
   private initializeCurrentUser(): void {
     const token = localStorage.getItem('token');
@@ -88,8 +97,10 @@ export class DataService {
       this.syncCurrentUser().subscribe({
         error: () => {
           const decodedToken = this.jwtHelper.decodeToken(token);
-          const fallbackUser = {
-            _id: decodedToken.id,
+          const userId = decodedToken.id;
+          const fallbackUser: User = {
+            id: userId,
+            _id: userId, // Ensure both id and _id are set to the same value
             username: decodedToken.username,
             email: decodedToken.email,
             role: decodedToken.role,
@@ -98,7 +109,7 @@ export class DataService {
           };
           this.currentUserSubject.next(fallbackUser);
           this.authService.setCurrentUser(fallbackUser);
-        }
+        },
       });
     }
   }
@@ -108,7 +119,7 @@ export class DataService {
       this.currentUserSubject.next({ ...currentUser, ...userData });
     }
   }
-
+ 
   updateSelf(userId: string, updateData: any): Observable<any> {
     return this.http
       .put<User>(
@@ -127,47 +138,54 @@ export class DataService {
         catchError(this.handleError)
       );
   }
-changePassword(currentPassword: string, newPassword: string): Observable<any> {
-  const userId = this.currentUserValue?._id;
-  if (!userId) {
-    return throwError(() => new Error('User not logged in'));
-  }
-  const passwordData = {
-    currentPassword,
-    newPassword
-  };
-  return this.http.put<any>(
-    `${environment.urlBackend}users/updateself/${userId}`,
-    passwordData,
-    {
-      headers: this.getUserHeaders(),
-      params: this.getCommonParams()
+  changePassword(
+    currentPassword: string,
+    newPassword: string
+  ): Observable<any> {
+    const userId = this.currentUserValue?._id;
+    if (!userId) {
+      return throwError(() => new Error('User not logged in'));
     }
-  ).pipe(
-    tap((response) => {
-      if (response.token) {
-        localStorage.setItem('token', response.token);
-        const decodedToken = this.jwtHelper.decodeToken(response.token);
-        this.updateCurrentUser(decodedToken);
-      }
-    }),
-    catchError((error: HttpErrorResponse) => {
-      if (error.status === 400) {
-        if (error.error?.errors?.general) {
-          return throwError(() => new Error(error.error.errors.general));
+    const passwordData = {
+      currentPassword,
+      newPassword,
+    };
+    return this.http
+      .put<any>(
+        `${environment.urlBackend}users/updateself/${userId}`,
+        passwordData,
+        {
+          headers: this.getUserHeaders(),
+          params: this.getCommonParams(),
         }
-        return throwError(() => new Error(error.error?.message || 'Validation failed'));
-      }
-      return throwError(() => new Error('Failed to change password'));
-    })
-  );
-}
+      )
+      .pipe(
+        tap((response) => {
+          if (response.token) {
+            localStorage.setItem('token', response.token);
+            const decodedToken = this.jwtHelper.decodeToken(response.token);
+            this.updateCurrentUser(decodedToken);
+          }
+        }),
+        catchError((error: HttpErrorResponse) => {
+          if (error.status === 400) {
+            if (error.error?.errors?.general) {
+              return throwError(() => new Error(error.error.errors.general));
+            }
+            return throwError(
+              () => new Error(error.error?.message || 'Validation failed')
+            );
+          }
+          return throwError(() => new Error('Failed to change password'));
+        })
+      );
+  }
   uploadProfileImage(
     file: File
   ): Observable<{ imageUrl: string; token?: string }> {
     const formData = new FormData();
     formData.append('image', file);
-
+ 
     return this.http
       .post<{ imageUrl: string; token?: string }>(
         `${environment.urlBackend}users/upload-profile-image`,
@@ -213,45 +231,57 @@ changePassword(currentPassword: string, newPassword: string): Observable<any> {
         catchError(this.handleError)
       );
   }
-
+ 
   get currentUserValue(): User | null {
     return this.currentUserSubject.value;
   }
-
+ 
   isAdmin(): boolean {
     return this.currentUserValue?.role === 'admin';
   }
   isCurrentUser(userId: string): boolean {
-    return this.currentUserValue?._id === userId;
+    const currentUser = this.currentUserValue;
+    if (!currentUser) return false;
+ 
+    // Check both id and _id for compatibility
+    return currentUser.id === userId || currentUser._id === userId;
   }
   private updateUserInCache(updatedUser: User): void {
-    const updatedUsers = this.usersCache$.value.map((u) =>
-      u._id === updatedUser._id ? { ...u, ...updatedUser } : u
-    );
+    const updatedUsers = this.usersCache$.value.map((u) => {
+      // Check both id and _id for compatibility
+      const isMatch =
+        (u.id && updatedUser.id && u.id === updatedUser.id) ||
+        (u._id && updatedUser._id && u._id === updatedUser._id);
+ 
+      return isMatch ? { ...u, ...updatedUser } : u;
+    });
     this.usersCache$.next(updatedUsers);
   }
-   refreshUserCache(): void {
+  refreshUserCache(): void {
     this.lastFetchTime = 0;
     this.getAllUsers(true).subscribe();
   }
   getAllUsers(forceRefresh = false): Observable<User[]> {
     const now = Date.now();
-    const cacheValid = !forceRefresh && 
-                     this.usersCache$.value.length > 0 && 
-                     now - this.lastFetchTime <= this.CACHE_DURATION;
-
+    const cacheValid =
+      !forceRefresh &&
+      this.usersCache$.value.length > 0 &&
+      now - this.lastFetchTime <= this.CACHE_DURATION;
+ 
     if (cacheValid) {
       return this.usersCache$.asObservable();
     }
-
+ 
     this.lastFetchTime = now;
-    return this.http.get<User[]>(`${environment.urlBackend}users/getall`, {
-      headers: this.getAdminHeaders(),
-      params: this.getCommonParams()
-    }).pipe(
-      tap(users => this.usersCache$.next([...users])),
-      catchError(this.handleError)
-    );
+    return this.http
+      .get<User[]>(`${environment.urlBackend}users/getall`, {
+        headers: this.getAdminHeaders(),
+        params: this.getCommonParams(),
+      })
+      .pipe(
+        tap((users) => this.usersCache$.next([...users])),
+        catchError(this.handleError)
+      );
   }
   getOneUser(id: string): Observable<User> {
     return this.http
@@ -262,19 +292,21 @@ changePassword(currentPassword: string, newPassword: string): Observable<any> {
       .pipe(catchError(this.handleError));
   }
   addUser(userData: User): Observable<User> {
-    return this.http.post<User>(`${environment.urlBackend}users/add`, userData, {
-      headers: this.getAdminHeaders(),
-      params: this.getCommonParams()
-    }).pipe(
-      tap(newUser => {
-        const currentUsers = this.usersCache$.value;
-        this.usersCache$.next([...currentUsers, newUser]);
-        this.userAddedSubject.next(); 
-      }),
-      catchError(this.handleError)
-    );
+    return this.http
+      .post<User>(`${environment.urlBackend}users/add`, userData, {
+        headers: this.getAdminHeaders(),
+        params: this.getCommonParams(),
+      })
+      .pipe(
+        tap((newUser) => {
+          const currentUsers = this.usersCache$.value;
+          this.usersCache$.next([...currentUsers, newUser]);
+          this.userAddedSubject.next();
+        }),
+        catchError(this.handleError)
+      );
   }
-
+ 
   deleteUser(id: string): Observable<void> {
     return this.http
       .delete<void>(`${environment.urlBackend}users/delete/${id}`, {
@@ -284,7 +316,7 @@ changePassword(currentPassword: string, newPassword: string): Observable<any> {
       .pipe(
         tap(() => {
           const updatedUsers = this.usersCache$.value.filter(
-            (u) => u._id !== id
+            (u) => u.id !== id && u._id !== id
           );
           this.usersCache$.next(updatedUsers);
         }),
@@ -328,7 +360,7 @@ changePassword(currentPassword: string, newPassword: string): Observable<any> {
   }
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'Une erreur est survenue';
-
+ 
     if (error.status === 0) {
       errorMessage = 'Erreur réseau - impossible de contacter le serveur';
     } else if (error.status >= 400 && error.status < 500) {
@@ -336,9 +368,9 @@ changePassword(currentPassword: string, newPassword: string): Observable<any> {
     } else if (error.status >= 500) {
       errorMessage = 'Erreur serveur - veuillez réessayer plus tard';
     }
-
+ 
     console.error(`Erreur ${error.status}:`, error.error);
     return throwError(() => new Error(errorMessage));
   }
 }
-
+ 

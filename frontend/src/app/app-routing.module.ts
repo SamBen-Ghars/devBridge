@@ -60,12 +60,20 @@ const routes: Routes = [
         loadChildren: () => import('./views/front/notifications/notifications.module').then(m => m.NotificationsModule),
         canActivateChild: [guarduserGuard],
       },
-      { 
-        path: 'projects', 
-        loadChildren: () => import('./views/front/projects/projects.module').then(m => m.ProjectsModule),
-        canActivateChild: [guarduserGuard],
+      {
+        path: 'front/projects',
+        loadChildren: () =>
+          import('./views/front/projects/projects.module').then((m) => m.ProjectsModule),
+        canActivateChild: [guarduserGuard] // Protection pour utilisateurs authentifiés
       },
+      //{ 
+       // path: 'projects', 
+      //  loadChildren: () => import('./views/front/projects/projects.module').then(m => m.ProjectsModule),
+      //  canActivateChild: [guarduserGuard],
+      //},
       // sameh &med & ...
+
+
     ],
   },
 
@@ -122,7 +130,15 @@ const routes: Routes = [
 
         ),
       },
-      // sameh med & ....
+     
+      {
+        path:'projects',
+        loadChildren: () =>
+          import('./views/admin/projects/projects.module').then((m) => m.ProjectsModule),
+        canActivateChild: [guarduserGuard] // optional, if admin protection is needed
+      },
+
+       // sameh med & ....
     ],
   },
   { path: 'admin/login', component: AuthAdminLayoutComponent },

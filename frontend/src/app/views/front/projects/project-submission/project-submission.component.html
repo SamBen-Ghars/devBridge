@@ -1,0 +1,66 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6">
+    <h1 class="text-2xl font-bold mb-6 text-gray-800">Soumettre un projet</h1>
+
+    <div *ngIf="isLoading" class="flex justify-center my-8">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+    </div>
+
+    <div *ngIf="projet && !isLoading">
+      <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+        <h2 class="text-xl font-semibold mb-2">Informations sur le projet</h2>
+        <p><span class="font-medium">Titre:</span> {{ projet.titre }}</p>
+        <p><span class="font-medium">Description:</span> {{ projet.description }}</p>
+        <p><span class="font-medium">Date limite:</span> {{ projet.dateLimite | date:'dd/MM/yyyy' }}</p>
+      </div>
+
+      <form [formGroup]="submissionForm" (ngSubmit)="onSubmit()">
+        <div class="mb-4">
+          <label for="description" class="block text-gray-700 font-medium mb-2">Description de votre travail</label>
+          <textarea 
+            id="description" 
+            formControlName="description" 
+            rows="5" 
+            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+            placeholder="Décrivez votre travail, les fonctionnalités implémentées, les difficultés rencontrées, etc."
+          ></textarea>
+          <div *ngIf="submissionForm.get('description')?.invalid && submissionForm.get('description')?.touched" class="text-red-500 mt-1">
+            La description est requise et doit contenir au moins 10 caractères.
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <label for="fichiers" class="block text-gray-700 font-medium mb-2">Fichiers du projet</label>
+          <input 
+            type="file" 
+            id="fichiers" 
+            multiple 
+            (change)="onFileChange($event)" 
+            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+          <div *ngIf="selectedFiles.length === 0" class="text-red-500 mt-1">
+            Veuillez sélectionner au moins un fichier.
+          </div>
+          <div *ngIf="selectedFiles.length > 0" class="mt-2">
+            <p class="font-medium">Fichiers sélectionnés:</p>
+            <ul class="list-disc pl-5">
+              <li *ngFor="let file of selectedFiles">{{ file.name }} ({{ (file.size / 1024).toFixed(2) }} KB)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <button 
+            type="submit" 
+            [disabled]="submissionForm.invalid || selectedFiles.length === 0 || isSubmitting" 
+            class="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors disabled:opacity-50"
+          >
+            <span *ngIf="!isSubmitting">Soumettre le projet</span>
+            <span *ngIf="isSubmitting">Soumission en cours...</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+

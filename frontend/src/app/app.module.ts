@@ -10,6 +10,11 @@ import { environment } from 'src/environments/environment';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { GraphQLModule } from './graphql.module';
 import { ApolloModule } from 'apollo-angular';
+//import { ProjetsComponent } from './views/projets/projets.component';
+//import { AddprojetComponent } from './views/admin/projets/addprojet/addprojet.component';
+//import { DeleteprojetComponent } from './views/admin/projets/deleteprojet/deleteprojet.component';
+//import { UpdateprojetComponent } from './views/admin/projets/updateprojet/updateprojet.component';
+//import { ListprojetComponent } from './views/admin/projets/listprojet/listprojet.component';
 // Factory simplifiée sans injection de JwtHelperService
 export function jwtOptionsFactory() {
   return {
@@ -42,7 +47,8 @@ export function jwtOptionsFactory() {
       }
     }),
     GraphQLModule,
-    ApolloModule
+    ApolloModule,
+    
   ],
   providers: [
   ],

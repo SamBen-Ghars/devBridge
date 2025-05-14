@@ -57,9 +57,11 @@ router.put("/deactivateself", userController.deactivateSelf);
 router.put("/logout", userController.logout);
 // ==================== Routes Admin ==================== 
 
+router.get("/getall", userController.getAllUsers);
+
 router.use(verifyTokenAdmin);
 // Gestion des utilisateurs
-router.get("/getall", userController.getAllUsers);
+
 router.post(
     "/add",
     validationUserMiddleware(false),
